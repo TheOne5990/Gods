@@ -1,0 +1,1777 @@
+# This workflow will build and push a new container image to Amazon ECR,
+# and then will deploy a new task definition to Amazon ECS, when a release is created
+#
+# To use this workflow, you will need to complete the following set-up steps:
+#
+# 1. Create an ECR repository to store your images.
+#    For example: `aws ecr create-repository --repository-name my-ecr-repo --region us-east-2`.
+#    Replace the value of `ECR_REPOSITORY` in the workflow below with your repository's name.
+#    Replace the value of `aws-region` in the workflow below with your repository's region.
+#
+# 2. Create an ECS task definition, an ECS cluster, and an ECS service.
+#    For example, follow the Getting Started guide on the ECS console:
+#      https://us-east-2.console.aws.amazon.com/ecs/home?region=us-east-2#/firstRun
+#    Replace the values for `service` and `cluster` in the workflow below with your service and cluster names.
+#
+# 3. Store your ECS task definition as a JSON file in your repository.
+#    The format should follow the output of `aws ecs register-task-definition --generate-cli-skeleton`.
+#    Replace the value of `task-definition` in the workflow below with your JSON file's name.
+#    Replace the value of `container-name` in the workflow below with the name of the container
+#    in the `containerDefinitions` section of the task definition.
+#
+# 4. Store an IAM user access key in GitHub Actions secrets named `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+#    See the documentation for each action used below for the recommended IAM policies for this IAM user,
+#    and best practices on handling the access key credentials.
+
+on:
+  release:
+    types: [created]
+
+name: Deploy to Amazon ECS
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: my-ecr-repo
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build a docker container and
+        # push it to ECR so that it can
+        # be deployed to ECS.
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: sample-app
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: sample-app-service
+        cluster: default
+        wait-for-service-stability: true1
+Build started
+2
+git clone -q https://github.com/Eugeny/terminus.git C:\projects\terminus
+3
+git fetch -q origin +refs/pull/2583/merge:
+4
+git checkout -qf FETCH_HEAD
+5
+Unable to load build cache items - skipping cache restore
+6
+Illegal characters in path.
+7
+Running Install scripts
+8
+Install-Product node $env:nodejs_version $env:platform
+9
+Uninstalling node 8.17.0 (x86)...
+10
+Installing node 10.20.1 (x64)...
+11
+yarn
+12
+yarn install v1.21.1
+13
+[1/4] Resolving packages...
+14
+[2/4] Fetching packages...
+15
+[3/4] Linking dependencies...
+16
+warning " > css-loader@3.4.2" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+17
+warning " > file-loader@5.0.2" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+18
+warning " > raw-loader@4.0.1" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+19
+warning " > sass-loader@8.0.0" has incorrect peer dependency "webpack@^4.36.0".
+20
+warning " > style-loader@1.1.4" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+21
+warning " > url-loader@3.0.0" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+22
+warning " > val-loader@2.1.1" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+23
+warning "webpack > terser-webpack-plugin@2.3.6" has incorrect peer dependency "webpack@^4.0.0 || ^5.0.0".
+24
+warning " > webpack-cli@3.3.10" has incorrect peer dependency "webpack@4.x.x".
+25
+warning abbrev@1.1.0: Invalid bin field for "abbrev".
+26
+warning ansicolors@0.3.2: Invalid bin field for "ansicolors".
+27
+warning ansistyles@0.1.3: Invalid bin field for "ansistyles".
+28
+warning archy@1.0.0: Invalid bin field for "archy".
+29
+warning call-limit@1.1.0: Invalid bin field for "call-limit".
+30
+warning bluebird@3.5.0: Invalid bin field for "bluebird".
+31
+warning chownr@1.0.1: Invalid bin field for "chownr".
+32
+warning cmd-shim@2.0.2: Invalid bin field for "cmd-shim".
+33
+warning columnify@1.5.4: Invalid bin field for "columnify".
+34
+warning config-chain@1.1.11: Invalid bin field for "config-chain".
+35
+warning debuglog@1.0.1: Invalid bin field for "debuglog".
+36
+warning detect-indent@5.0.0: Invalid bin field for "detect-indent".
+37
+warning dezalgo@1.0.3: Invalid bin field for "dezalgo".
+38
+warning editor@1.0.0: Invalid bin field for "editor".
+39
+warning fs-vacuum@1.2.10: Invalid bin field for "fs-vacuum".
+40
+warning fs-write-stream-atomic@1.0.10: Invalid bin field for "fs-write-stream-atomic".
+41
+warning fstream@1.0.11: Invalid bin field for "fstream".
+42
+warning graceful-fs@4.1.11: Invalid bin field for "graceful-fs".
+43
+warning has-unicode@2.0.1: Invalid bin field for "has-unicode".
+44
+warning iferr@0.1.5: Invalid bin field for "iferr".
+45
+warning imurmurhash@0.1.4: Invalid bin field for "imurmurhash".
+46
+warning inflight@1.0.6: Invalid bin field for "inflight".
+47
+warning inherits@2.0.3: Invalid bin field for "inherits".
+48
+warning ini@1.3.4: Invalid bin field for "ini".
+49
+warning init-package-json@1.10.1: Invalid bin field for "init-package-json".
+50
+warning lazy-property@1.0.0: Invalid bin field for "lazy-property".
+51
+warning lockfile@1.0.3: Invalid bin field for "lockfile".
+52
+warning lodash._baseindexof@3.1.0: Invalid bin field for "lodash._baseindexof".
+53
+warning lodash._baseuniq@4.6.0: Invalid bin field for "lodash._baseuniq".
+54
+warning lodash._bindcallback@3.0.1: Invalid bin field for "lodash._bindcallback".
+55
+warning lodash._cacheindexof@3.0.2: Invalid bin field for "lodash._cacheindexof".
+56
+warning lodash._createcache@3.1.2: Invalid bin field for "lodash._createcache".
+57
+warning lodash._getnative@3.9.1: Invalid bin field for "lodash._getnative".
+58
+warning lodash.clonedeep@4.5.0: Invalid bin field for "lodash.clonedeep".
+59
+warning lodash.restparam@3.6.1: Invalid bin field for "lodash.restparam".
+60
+warning lodash.union@4.6.0: Invalid bin field for "lodash.union".
+61
+warning lodash.uniq@4.5.0: Invalid bin field for "lodash.uniq".
+62
+warning lodash.without@4.4.0: Invalid bin field for "lodash.without".
+63
+warning mississippi@1.3.0: Invalid bin field for "mississippi".
+64
+warning move-concurrently@1.0.1: Invalid bin field for "move-concurrently".
+65
+warning npm-cache-filename@1.0.2: Invalid bin field for "npm-cache-filename".
+66
+warning npm-install-checks@3.0.0: Invalid bin field for "npm-install-checks".
+67
+warning once@1.4.0: Invalid bin field for "once".
+68
+warning osenv@0.1.4: Invalid bin field for "osenv".
+69
+warning path-is-inside@1.0.2: Invalid bin field for "path-is-inside".
+70
+warning promise-inflight@1.0.1: Invalid bin field for "promise-inflight".
+71
+warning read@1.0.7: Invalid bin field for "read".
+72
+warning read-cmd-shim@1.0.1: Invalid bin field for "read-cmd-shim".
+73
+warning read-installed@4.0.3: Invalid bin field for "read-installed".
+74
+warning readdir-scoped-modules@1.0.2: Invalid bin field for "readdir-scoped-modules".
+75
+warning retry@0.10.1: Invalid bin field for "retry".
+76
+warning sha@2.0.1: Invalid bin field for "sha".
+77
+warning slide@1.1.6: Invalid bin field for "slide".
+78
+warning sorted-object@2.0.1: Invalid bin field for "sorted-object".
+79
+warning sorted-union-stream@2.1.3: Invalid bin field for "sorted-union-stream".
+80
+warning tar@2.2.1: Invalid bin field for "tar".
+81
+warning text-table@0.2.0: Invalid bin field for "text-table".
+82
+warning uid-number@0.0.6: Invalid bin field for "uid-number".
+83
+warning umask@1.1.0: Invalid bin field for "umask".
+84
+warning unique-filename@1.1.0: Invalid bin field for "unique-filename".
+85
+warning unpipe@1.0.0: Invalid bin field for "unpipe".
+86
+warning validate-npm-package-license@3.0.1: Invalid bin field for "validate-npm-package-license".
+87
+warning validate-npm-package-name@3.0.0: Invalid bin field for "validate-npm-package-name".
+88
+warning wrappy@1.0.2: Invalid bin field for "wrappy".
+89
+[4/4] Building fresh packages...
+90
+$ node ./scripts/install-deps.js
+91
+info deps app
+92
+yarn install v1.21.1
+93
+warning package.json: No license field
+94
+warning terminus@1.0.0-alpha.1: No license field
+95
+[1/4] Resolving packages...
+96
+[2/4] Fetching packages...
+97
+info macos-native-processlist@1.0.2: The platform "win32" is incompatible with this module.
+98
+info "macos-native-processlist@1.0.2" is an optional dependency and failed compatibility check. Excluding it from installation.
+99
+[3/4] Linking dependencies...
+100
+warning " > @angular/animations@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+101
+warning " > @angular/common@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+102
+warning " > @angular/compiler@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+103
+warning " > @angular/core@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+104
+warning " > @angular/forms@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+105
+warning " > @angular/platform-browser@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+106
+warning " > @angular/platform-browser-dynamic@9.1.4" has unmet peer dependency "tslib@^1.10.0".
+107
+warning " > @ng-bootstrap/ng-bootstrap@6.1.0" has unmet peer dependency "@angular/localize@^9.0.0".
+108
+warning " > @ng-bootstrap/ng-bootstrap@6.1.0" has unmet peer dependency "tslib@^1.10.0".
+109
+warning " > ngx-toastr@12.0.1" has unmet peer dependency "tslib@^1.10.0".
+110
+[4/4] Building fresh packages...
+111
+Done in 103.05s.
+112
+info deps terminus-core
+113
+yarn install v1.21.1
+114
+[1/4] Resolving packages...
+115
+[2/4] Fetching packages...
+116
+[3/4] Linking dependencies...
+117
+warning " > bootstrap@4.4.1" has unmet peer dependency "jquery@1.9.1 - 3".
+118
+warning " > bootstrap@4.4.1" has unmet peer dependency "popper.js@^1.16.0".
+119
+warning " > ng2-dnd@5.0.2" has unmet peer dependency "@angular/core@^4.0.0 || ^5.0.0".
+120
+warning " > ng2-dnd@5.0.2" has unmet peer dependency "@angular/forms@^4.0.0 || ^5.0.0".
+121
+warning " > ngx-perfect-scrollbar@8.0.0" has unmet peer dependency "@angular/common@>=5.0.0".
+122
+warning " > ngx-perfect-scrollbar@8.0.0" has unmet peer dependency "@angular/core@>=5.0.0".
+123
+warning " > ngx-perfect-scrollbar@8.0.0" has unmet peer dependency "rxjs@>=6.0.0".
+124
+[4/4] Building fresh packages...
+125
+Done in 4.94s.
+126
+info deps terminus-settings
+127
+yarn install v1.21.1
+128
+[1/4] Resolving packages...
+129
+[2/4] Fetching packages...
+130
+[3/4] Linking dependencies...
+131
+[4/4] Building fresh packages...
+132
+Done in 0.33s.
+133
+info deps terminus-terminal
+134
+yarn install v1.21.1
+135
+[1/4] Resolving packages...
+136
+[2/4] Fetching packages...
+137
+[3/4] Linking dependencies...
+138
+[4/4] Building fresh packages...
+139
+Done in 1.62s.
+140
+info deps terminus-community-color-schemes
+141
+yarn install v1.21.1
+142
+[1/4] Resolving packages...
+143
+[2/4] Fetching packages...
+144
+[3/4] Linking dependencies...
+145
+[4/4] Building fresh packages...
+146
+success Saved lockfile.
+147
+Done in 0.13s.
+148
+info deps terminus-plugin-manager
+149
+yarn install v1.21.1
+150
+[1/4] Resolving packages...
+151
+[2/4] Fetching packages...
+152
+[3/4] Linking dependencies...
+153
+[4/4] Building fresh packages...
+154
+Done in 0.62s.
+155
+info deps terminus-ssh
+156
+yarn install v1.21.1
+157
+[1/4] Resolving packages...
+158
+[2/4] Fetching packages...
+159
+[3/4] Linking dependencies...
+160
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/animations@^7".
+161
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/common@^7".
+162
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/core@^7".
+163
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/forms@^7".
+164
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/platform-browser@^7".
+165
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@ng-bootstrap/ng-bootstrap@^1".
+166
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "rxjs@^5".
+167
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "terminus-core@*".
+168
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "terminus-settings@*".
+169
+[4/4] Building fresh packages...
+170
+Done in 3.75s.
+171
+info deps terminus-serial
+172
+yarn install v1.21.1
+173
+[1/4] Resolving packages...
+174
+[2/4] Fetching packages...
+175
+[3/4] Linking dependencies...
+176
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/animations@^7".
+177
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/common@^7".
+178
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/core@^7".
+179
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/forms@^7".
+180
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@angular/platform-browser@^7".
+181
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "@ng-bootstrap/ng-bootstrap@^1".
+182
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "rxjs@^5".
+183
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "terminus-core@*".
+184
+warning " > terminus-terminal@1.0.98-nightly.0" has unmet peer dependency "terminus-settings@*".
+185
+[4/4] Building fresh packages...
+186
+Done in 8.50s.
+187
+Done in 188.77s.
+188
+node scripts/build-native.js
+189
+Building against Electron 8.3.0
+190
+Rebuilding app/bindings
+191
+Rebuilding app/fontmanager-redux
+192
+Rebuilding app/keytar
+193
+Rebuilding app/node-pty
+194
+Rebuilding app/windows-blurbehind
+195
+Rebuilding app/windows-native-registry
+196
+Rebuilding app/windows-process-tree
+197
+Rebuilding app/windows-swca
+198
+yarn run build
+199
+yarn run v1.21.1
+200
+$ npm run build:typings && webpack --color --config app/webpack.main.config.js && webpack --color --config app/webpack.config.js && webpack --color --config terminus-core/webpack.config.js && webpack --color --config terminus-settings/webpack.config.js && webpack --color --config terminus-terminal/webpack.config.js && webpack --color --config terminus-plugin-manager/webpack.config.js && webpack --color --config terminus-community-color-schemes/webpack.config.js && webpack --color --config terminus-ssh/webpack.config.js && webpack --color --config terminus-serial/webpack.config.js
+201
+202
+> @ build:typings C:\projects\terminus
+203
+> node scripts/build-typings.js
+204
+205
+info typings terminus-core
+206
+info typings terminus-settings
+207
+info typings terminus-terminal
+208
+info typings terminus-community-color-schemes
+209
+info typings terminus-plugin-manager
+210
+info typings terminus-ssh
+211
+info typings terminus-serial
+212
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+213
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/app/tsconfig.main.json
+214
+ℹ 「atl」: Checking started in a separate process...
+215
+ℹ 「atl」: Time: 2059ms
+216
+Hash: 4234cf4231b055b969cd
+217
+Version: webpack 5.0.0-beta.16
+218
+Time: 25942 ms
+219
+Built at: 2020-05-15 05:03:14
+220
+              Asset     Size
+221
+            main.js  932 KiB  [emitted]        [name: main]
+222
+main.js.LICENSE.txt  421 KiB  [emitted]
+223
+        main.js.map  2.2 MiB  [emitted] [dev]  [name: (main)]
+224
+Entrypoint main = main.js (main.js.map)
+225
+./lib/index.ts 1.69 KiB [built]
+226
+./lib/portable.ts 887 bytes [built]
+227
+external "electron" 42 bytes [built]
+228
+./lib/sentry.ts 709 bytes [built]
+229
+./lib/lru.ts 552 bytes [built]
+230
+./lib/cli.ts 1.48 KiB [built]
+231
+./lib/app.ts 7.4 KiB [built]
+232
+./node_modules/electron-debug/index.js 2.67 KiB [built]
+233
+external "path" 42 bytes [built]
+234
+external "fs" 42 bytes [built]
+235
+../node_modules/@sentry/electron/dist/main/index.js 1.48 KiB [built]
+236
+./node_modules/electron-is-dev/index.js 281 bytes [built]
+237
+./node_modules/lru-cache/index.js 10.4 KiB [built]
+238
+external "yargs" 42 bytes [built]
+239
+./lib/config.ts 510 bytes [built]
+240
+    + 298 hidden modules
+241
+242
+WARNING in ./node_modules/electron-debug/index.js 96:45-58
+243
+Critical dependency: the request of a dependency is an expression
+244
+ @ ./lib/index.ts 9:22-47
+245
+246
+WARNING in ./node_modules/electron-debug/index.js 97:61-74
+247
+Critical dependency: the request of a dependency is an expression
+248
+ @ ./lib/index.ts 9:22-47
+249
+250
+WARNING in ./node_modules/encoding/lib/iconv-loader.js 9:12-34
+251
+Critical dependency: the request of a dependency is an expression
+252
+ @ ./node_modules/encoding/lib/encoding.js 6:12-37
+253
+ @ ../node_modules/electron-fetch/lib/index.es.js 7:0-35 421:9-16
+254
+ @ ../node_modules/@sentry/electron/dist/main/uploader.js 4:25-50
+255
+ @ ../node_modules/@sentry/electron/dist/main/backend.js 14:19-40
+256
+ @ ../node_modules/@sentry/electron/dist/main/index.js 11:16-36
+257
+ @ ./lib/sentry.ts 3:43-80
+258
+ @ ./lib/index.ts 4:0-19
+259
+260
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+261
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/app/tsconfig.json
+262
+ℹ 「atl」: Checking started in a separate process...
+263
+ℹ 「atl」: Time: 2445ms
+264
+Hash: f6281268b5f63daf23eb
+265
+Version: webpack 5.0.0-beta.16
+266
+Time: 11564 ms
+267
+Built at: 2020-05-15 05:03:26
+268
+                                     Asset       Size
+269
+                                 bundle.js    215 KiB  [emitted]        [name: bundle]
+270
+                             bundle.js.map    179 KiB  [emitted] [dev]  [name: (bundle)]
+271
+             fonts/SourceCodePro-Black.otf    146 KiB  [emitted]        [name: (preload)]
+272
+        fonts/SourceCodePro-Black.otf.woff   93.8 KiB  [emitted]        [name: (preload)]
+273
+             fonts/SourceCodePro-Black.ttf    207 KiB  [emitted]        [name: (preload)]
+274
+       fonts/SourceCodePro-Black.ttf.woff2   68.1 KiB  [emitted]        [name: (preload)]
+275
+           fonts/SourceCodePro-BlackIt.otf    122 KiB  [emitted]        [name: (preload)]
+276
+      fonts/SourceCodePro-BlackIt.otf.woff 79.2 KiB  [emitted]        [name: (preload)]
+277
+           fonts/SourceCodePro-BlackIt.ttf    170 KiB  [emitted]        [name: (preload)]
+278
+     fonts/SourceCodePro-BlackIt.ttf.woff2 58.2 KiB  [emitted]        [name: (preload)]
+279
+              fonts/SourceCodePro-Bold.otf    145 KiB  [emitted]        [name: (preload)]
+280
+         fonts/SourceCodePro-Bold.otf.woff   94.4 KiB  [emitted]        [name: (preload)]
+281
+              fonts/SourceCodePro-Bold.ttf    207 KiB  [emitted]        [name: (preload)]
+282
+        fonts/SourceCodePro-Bold.ttf.woff2   68.9 KiB  [emitted]        [name: (preload)]
+283
+            fonts/SourceCodePro-BoldIt.otf    120 KiB  [emitted]        [name: (preload)]
+284
+       fonts/SourceCodePro-BoldIt.otf.woff   79.3 KiB  [emitted]        [name: (preload)]
+285
+            fonts/SourceCodePro-BoldIt.ttf    170 KiB  [emitted]        [name: (preload)]
+286
+      fonts/SourceCodePro-BoldIt.ttf.woff2   59.3 KiB  [emitted]        [name: (preload)]
+287
+        fonts/SourceCodePro-ExtraLight.otf  138 KiB  [emitted]        [name: (preload)]
+288
+   fonts/SourceCodePro-ExtraLight.otf.woff   87.9 KiB  [emitted]      [name: (preload)]
+289
+        fonts/SourceCodePro-ExtraLight.ttf    209 KiB  [emitted]        [name: (preload)]
+290
+  fonts/SourceCodePro-ExtraLight.ttf.woff2   67.6 KiB  [emitted]      [name: (preload)]
+291
+      fonts/SourceCodePro-ExtraLightIt.otf  117 KiB  [emitted]        [name: (preload)]
+292
+ fonts/SourceCodePro-ExtraLightIt.otf.woff   75.6 KiB  [emitted]    [name: (preload)]
+293
+      fonts/SourceCodePro-ExtraLightIt.ttf    172 KiB  [emitted]        [name: (preload)]
+294
+fonts/SourceCodePro-ExtraLightIt.ttf.woff2   57.4 KiB  [emitted]    [name: (preload)]
+295
+                fonts/SourceCodePro-It.otf    119 KiB  [emitted]        [name: (preload)]
+296
+           fonts/SourceCodePro-It.otf.woff   79.1 KiB  [emitted]        [name: (preload)]
+297
+                fonts/SourceCodePro-It.ttf    176 KiB  [emitted]        [name: (preload)]
+298
+          fonts/SourceCodePro-It.ttf.woff2   59.3 KiB  [emitted]        [name: (preload)]
+299
+             fonts/SourceCodePro-Light.otf    142 KiB  [emitted]        [name: (preload)]
+300
+        fonts/SourceCodePro-Light.otf.woff   92.6 KiB  [emitted]        [name: (preload)]
+301
+             fonts/SourceCodePro-Light.ttf    208 KiB  [emitted]        [name: (preload)]
+302
+       fonts/SourceCodePro-Light.ttf.woff2   69.2 KiB  [emitted]        [name: (preload)]
+303
+           fonts/SourceCodePro-LightIt.otf    120 KiB  [emitted]        [name: (preload)]
+304
+      fonts/SourceCodePro-LightIt.otf.woff   78.6 KiB  [emitted]        [name: (preload)]
+305
+           fonts/SourceCodePro-LightIt.ttf    172 KiB  [emitted]        [name: (preload)]
+306
+     fonts/SourceCodePro-LightIt.ttf.woff2   59.4 KiB  [emitted]        [name: (preload)]
+307
+            fonts/SourceCodePro-Medium.otf  142 KiB  [emitted]        [name: (preload)]
+308
+       fonts/SourceCodePro-Medium.otf.woff   93.4 KiB  [emitted]        [name: (preload)]
+309
+            fonts/SourceCodePro-Medium.ttf    207 KiB  [emitted]        [name: (preload)]
+310
+      fonts/SourceCodePro-Medium.ttf.woff2   69.1 KiB  [emitted]        [name: (preload)]
+311
+          fonts/SourceCodePro-MediumIt.otf  120 KiB  [emitted]        [name: (preload)]
+312
+     fonts/SourceCodePro-MediumIt.otf.woff   79.1 KiB  [emitted]        [name: (preload)]
+313
+          fonts/SourceCodePro-MediumIt.ttf  171 KiB  [emitted]        [name: (preload)]
+314
+    fonts/SourceCodePro-MediumIt.ttf.woff2   59.3 KiB  [emitted]        [name: (preload)]
+315
+           fonts/SourceCodePro-Regular.otf    142 KiB  [emitted]        [name: (preload)]
+316
+      fonts/SourceCodePro-Regular.otf.woff 93.5 KiB  [emitted]        [name: (preload)]
+317
+           fonts/SourceCodePro-Regular.ttf    208 KiB  [emitted]        [name: (preload)]
+318
+     fonts/SourceCodePro-Regular.ttf.woff2 69.3 KiB  [emitted]        [name: (preload)]
+319
+          fonts/SourceCodePro-Semibold.otf  143 KiB  [emitted]        [name: (preload)]
+320
+     fonts/SourceCodePro-Semibold.otf.woff   94.3 KiB  [emitted]        [name: (preload)]
+321
+          fonts/SourceCodePro-Semibold.ttf    207 KiB  [emitted]        [name: (preload)]
+322
+    fonts/SourceCodePro-Semibold.ttf.woff2   69.1 KiB  [emitted]        [name: (preload)]
+323
+        fonts/SourceCodePro-SemiboldIt.otf  120 KiB  [emitted]        [name: (preload)]
+324
+   fonts/SourceCodePro-SemiboldIt.otf.woff   79.4 KiB  [emitted]      [name: (preload)]
+325
+        fonts/SourceCodePro-SemiboldIt.ttf  171 KiB  [emitted]        [name: (preload)]
+326
+  fonts/SourceCodePro-SemiboldIt.ttf.woff2   59.3 KiB  [emitted]    [name: (preload)]
+327
+             fonts/SourceSansPro-Black.otf    289 KiB  [emitted]        [name: (preload)]
+328
+        fonts/SourceSansPro-Black.otf.woff  144 KiB  [emitted]        [name: (preload)]
+329
+             fonts/SourceSansPro-Black.ttf    279 KiB  [emitted]        [name: (preload)]
+330
+       fonts/SourceSansPro-Black.ttf.woff2   83 KiB  [emitted]        [name: (preload)]
+331
+           fonts/SourceSansPro-BlackIt.otf    208 KiB  [emitted]        [name: (preload)]
+332
+      fonts/SourceSansPro-BlackIt.otf.woff  113 KiB  [emitted]        [name: (preload)]
+333
+           fonts/SourceSansPro-BlackIt.ttf    203 KiB  [emitted]        [name: (preload)]
+334
+     fonts/SourceSansPro-BlackIt.ttf.woff2   68.1 KiB  [emitted]        [name: (preload)]
+335
+              fonts/SourceSansPro-Bold.otf    291 KiB  [emitted]        [name: (preload)]
+336
+         fonts/SourceSansPro-Bold.otf.woff    148 KiB  [emitted]        [name: (preload)]
+337
+              fonts/SourceSansPro-Bold.ttf    282 KiB  [emitted]        [name: (preload)]
+338
+        fonts/SourceSansPro-Bold.ttf.woff2   87 KiB  [emitted]        [name: (preload)]
+339
+            fonts/SourceSansPro-BoldIt.otf    207 KiB  [emitted]        [name: (preload)]
+340
+       fonts/SourceSansPro-BoldIt.otf.woff    115 KiB  [emitted]        [name: (preload)]
+341
+            fonts/SourceSansPro-BoldIt.ttf    203 KiB  [emitted]        [name: (preload)]
+342
+      fonts/SourceSansPro-BoldIt.ttf.woff2   70.9 KiB  [emitted]        [name: (preload)]
+343
+        fonts/SourceSansPro-ExtraLight.otf    276 KiB  [emitted]        [name: (preload)]
+344
+   fonts/SourceSansPro-ExtraLight.otf.woff    134 KiB  [emitted]      [name: (preload)]
+345
+        fonts/SourceSansPro-ExtraLight.ttf    280 KiB  [emitted]        [name: (preload)]
+346
+  fonts/SourceSansPro-ExtraLight.ttf.woff2   82.8 KiB  [emitted]      [name: (preload)]
+347
+      fonts/SourceSansPro-ExtraLightIt.otf  194 KiB  [emitted]        [name: (preload)]
+348
+ fonts/SourceSansPro-ExtraLightIt.otf.woff    104 KiB  [emitted]    [name: (preload)]
+349
+      fonts/SourceSansPro-ExtraLightIt.ttf    204 KiB  [emitted]        [name: (preload)]
+350
+fonts/SourceSansPro-ExtraLightIt.ttf.woff2   68.1 KiB  [emitted]    [name: (preload)]
+351
+                fonts/SourceSansPro-It.otf    204 KiB  [emitted]        [name: (preload)]
+352
+           fonts/SourceSansPro-It.otf.woff    113 KiB  [emitted]        [name: (preload)]
+353
+                fonts/SourceSansPro-It.ttf    204 KiB  [emitted]        [name: (preload)]
+354
+          fonts/SourceSansPro-It.ttf.woff2   71.4 KiB  [emitted]        [name: (preload)]
+355
+             fonts/SourceSansPro-Light.otf    284 KiB  [emitted]        [name: (preload)]
+356
+        fonts/SourceSansPro-Light.otf.woff    143 KiB  [emitted]        [name: (preload)]
+357
+             fonts/SourceSansPro-Light.ttf    282 KiB  [emitted]        [name: (preload)]
+358
+       fonts/SourceSansPro-Light.ttf.woff2   86.7 KiB  [emitted]        [name: (preload)]
+359
+           fonts/SourceSansPro-LightIt.otf    200 KiB  [emitted]        [name: (preload)]
+360
+      fonts/SourceSansPro-LightIt.otf.woff    110 KiB  [emitted]        [name: (preload)]
+361
+           fonts/SourceSansPro-LightIt.ttf    205 KiB  [emitted]        [name: (preload)]
+362
+     fonts/SourceSansPro-LightIt.ttf.woff2   70.6 KiB  [emitted]        [name: (preload)]
+363
+           fonts/SourceSansPro-Regular.otf    286 KiB  [emitted]        [name: (preload)]
+364
+      fonts/SourceSansPro-Regular.otf.woff  145 KiB  [emitted]        [name: (preload)]
+365
+           fonts/SourceSansPro-Regular.ttf    283 KiB  [emitted]        [name: (preload)]
+366
+     fonts/SourceSansPro-Regular.ttf.woff2 87.6 KiB  [emitted]        [name: (preload)]
+367
+          fonts/SourceSansPro-Semibold.otf  289 KiB  [emitted]        [name: (preload)]
+368
+     fonts/SourceSansPro-Semibold.otf.woff    147 KiB  [emitted]        [name: (preload)]
+369
+          fonts/SourceSansPro-Semibold.ttf    283 KiB  [emitted]        [name: (preload)]
+370
+    fonts/SourceSansPro-Semibold.ttf.woff2   87.6 KiB  [emitted]        [name: (preload)]
+371
+        fonts/SourceSansPro-SemiboldIt.otf  205 KiB  [emitted]        [name: (preload)]
+372
+   fonts/SourceSansPro-SemiboldIt.otf.woff    114 KiB  [emitted]      [name: (preload)]
+373
+        fonts/SourceSansPro-SemiboldIt.ttf    204 KiB  [emitted]        [name: (preload)]
+374
+  fonts/SourceSansPro-SemiboldIt.ttf.woff2   71.2 KiB  [emitted]    [name: (preload)]
+375
+                   fonts/fa-brands-400.eot    130 KiB  [emitted]        [name: (preload)]
+376
+                   fonts/fa-brands-400.ttf    130 KiB  [emitted]        [name: (preload)]
+377
+                  fonts/fa-brands-400.woff   87.7 KiB  [emitted]        [name: (preload)]
+378
+                 fonts/fa-brands-400.woff2   74.8 KiB  [emitted]        [name: (preload)]
+379
+                    fonts/fa-solid-900.eot    198 KiB  [emitted]        [name: (preload)]
+380
+                    fonts/fa-solid-900.ttf    198 KiB [emitted]        [name: (preload)]
+381
+                   fonts/fa-solid-900.woff    101 KiB  [emitted]        [name: (preload)]
+382
+                  fonts/fa-solid-900.woff2   77.6 KiB  [emitted]        [name: (preload)]
+383
+                  images/fa-brands-400.svg    699 KiB  [emitted]        [name: (preload)]
+384
+                   images/fa-solid-900.svg    876 KiB  [emitted]        [name: (preload)]
+385
+                           images/logo.svg   2.94 KiB [emitted]        [name: (preload)]
+386
+                                index.html  551 bytes  [emitted]        [name: (index.ignore)]
+387
+                           index.ignore.js   1.14 KiB  [emitted]        [name: index.ignore]
+388
+                       index.ignore.js.map  437 bytes  [emitted] [dev]  [name: (index.ignore)]
+389
+                                preload.js    272 KiB  [emitted]        [name: preload]
+390
+                            preload.js.map    211 KiB  [emitted] [dev]  [name: (preload)]
+391
+                                 sentry.js    344 KiB  [emitted]        [name: sentry]
+392
+                             sentry.js.map    302 KiB  [emitted] [dev]  [name: (sentry)]
+393
+Entrypoint index.ignore = index.ignore.js (index.html index.ignore.js.map)
+394
+Entrypoint sentry = sentry.js (sentry.js.map)
+395
+Entrypoint preload = preload.js (fonts/SourceCodePro-Black.otf fonts/SourceCodePro-Black.otf.woff fonts/SourceCodePro-Black.ttf fonts/SourceCodePro-Black.ttf.woff2 fonts/SourceCodePro-BlackIt.otf fonts/SourceCodePro-BlackIt.otf.woff fonts/SourceCodePro-BlackIt.ttf fonts/SourceCodePro-BlackIt.ttf.woff2 fonts/SourceCodePro-Bold.otf fonts/SourceCodePro-Bold.otf.woff fonts/SourceCodePro-Bold.ttf fonts/SourceCodePro-Bold.ttf.woff2 fonts/SourceCodePro-BoldIt.otf fonts/SourceCodePro-BoldIt.otf.woff fonts/SourceCodePro-BoldIt.ttf fonts/SourceCodePro-BoldIt.ttf.woff2 fonts/SourceCodePro-ExtraLight.otf fonts/SourceCodePro-ExtraLight.otf.woff fonts/SourceCodePro-ExtraLight.ttf fonts/SourceCodePro-ExtraLight.ttf.woff2 fonts/SourceCodePro-ExtraLightIt.otf fonts/SourceCodePro-ExtraLightIt.otf.woff fonts/SourceCodePro-ExtraLightIt.ttf fonts/SourceCodePro-ExtraLightIt.ttf.woff2 fonts/SourceCodePro-It.otf fonts/SourceCodePro-It.otf.woff fonts/SourceCodePro-It.ttf fonts/SourceCodePro-It.ttf.woff2 fonts/SourceCodePro-Light.otf fonts/SourceCodePro-Light.otf.woff fonts/SourceCodePro-Light.ttf fonts/SourceCodePro-Light.ttf.woff2 fonts/SourceCodePro-LightIt.otf fonts/SourceCodePro-LightIt.otf.woff fonts/SourceCodePro-LightIt.ttf fonts/SourceCodePro-LightIt.ttf.woff2 fonts/SourceCodePro-Medium.otf fonts/SourceCodePro-Medium.otf.woff fonts/SourceCodePro-Medium.ttf fonts/SourceCodePro-Medium.ttf.woff2 fonts/SourceCodePro-MediumIt.otf fonts/SourceCodePro-MediumIt.otf.woff fonts/SourceCodePro-MediumIt.ttf fonts/SourceCodePro-MediumIt.ttf.woff2 fonts/SourceCodePro-Regular.otf fonts/SourceCodePro-Regular.otf.woff fonts/SourceCodePro-Regular.ttf fonts/SourceCodePro-Regular.ttf.woff2 fonts/SourceCodePro-Semibold.otf fonts/SourceCodePro-Semibold.otf.woff fonts/SourceCodePro-Semibold.ttf fonts/SourceCodePro-Semibold.ttf.woff2 fonts/SourceCodePro-SemiboldIt.otf fonts/SourceCodePro-SemiboldIt.otf.woff fonts/SourceCodePro-SemiboldIt.ttf fonts/SourceCodePro-SemiboldIt.ttf.woff2 fonts/SourceSansPro-Black.otf fonts/SourceSansPro-Black.otf.woff fonts/SourceSansPro-Black.ttf fonts/SourceSansPro-Black.ttf.woff2 fonts/SourceSansPro-BlackIt.otf fonts/SourceSansPro-BlackIt.otf.woff fonts/SourceSansPro-BlackIt.ttf fonts/SourceSansPro-BlackIt.ttf.woff2 fonts/SourceSansPro-Bold.otf fonts/SourceSansPro-Bold.otf.woff fonts/SourceSansPro-Bold.ttf fonts/SourceSansPro-Bold.ttf.woff2 fonts/SourceSansPro-BoldIt.otf fonts/SourceSansPro-BoldIt.otf.woff fonts/SourceSansPro-BoldIt.ttf fonts/SourceSansPro-BoldIt.ttf.woff2 fonts/SourceSansPro-ExtraLight.otf fonts/SourceSansPro-ExtraLight.otf.woff fonts/SourceSansPro-ExtraLight.ttf fonts/SourceSansPro-ExtraLight.ttf.woff2 fonts/SourceSansPro-ExtraLightIt.otf fonts/SourceSansPro-ExtraLightIt.otf.woff fonts/SourceSansPro-ExtraLightIt.ttf fonts/SourceSansPro-ExtraLightIt.ttf.woff2 fonts/SourceSansPro-It.otf fonts/SourceSansPro-It.otf.woff fonts/SourceSansPro-It.ttf fonts/SourceSansPro-It.ttf.woff2 fonts/SourceSansPro-Light.otf fonts/SourceSansPro-Light.otf.woff fonts/SourceSansPro-Light.ttf fonts/SourceSansPro-Light.ttf.woff2 fonts/SourceSansPro-LightIt.otf fonts/SourceSansPro-LightIt.otf.woff fonts/SourceSansPro-LightIt.ttf fonts/SourceSansPro-LightIt.ttf.woff2 fonts/SourceSansPro-Regular.otf fonts/SourceSansPro-Regular.otf.woff fonts/SourceSansPro-Regular.ttf fonts/SourceSansPro-Regular.ttf.woff2 fonts/SourceSansPro-Semibold.otf fonts/SourceSansPro-Semibold.otf.woff fonts/SourceSansPro-Semibold.ttf fonts/SourceSansPro-Semibold.ttf.woff2 fonts/SourceSansPro-SemiboldIt.otf fonts/SourceSansPro-SemiboldIt.otf.woff fonts/SourceSansPro-SemiboldIt.ttf fonts/SourceSansPro-SemiboldIt.ttf.woff2 fonts/fa-brands-400.eot fonts/fa-brands-400.ttf fonts/fa-brands-400.woff fonts/fa-brands-400.woff2 fonts/fa-solid-900.eot fonts/fa-solid-900.ttf fonts/fa-solid-900.woff fonts/fa-solid-900.woff2 images/fa-brands-400.svg images/fa-solid-900.svg images/logo.svg preload.js.map)
+396
+Entrypoint bundle = bundle.js (bundle.js.map)
+397
+../node_modules/file-loader/dist/cjs.js?name=index.html!../node_modules/pug-html-loader/lib/index.js!./index.pug 54 bytes [built]
+398
+./lib/sentry.ts 709 bytes [built]
+399
+./src/entry.preload.ts 442 bytes [built]
+400
+./src/entry.ts 3 KiB [built]
+401
+../node_modules/@sentry/electron/dist/renderer/index.js 735 bytes [built]
+402
+external "electron" 42 bytes [built]
+403
+external "electron-is-dev" 42 bytes [built]
+404
+./lib/lru.ts 552 bytes [built]
+405
+../node_modules/source-sans-pro/source-sans-pro.css 572 bytes [built]
+406
+../node_modules/source-code-pro/source-code-pro.css 572 bytes [built]
+407
+../node_modules/@fortawesome/fontawesome-free/css/solid.css 580 bytes [built]
+408
+../node_modules/@fortawesome/fontawesome-free/css/brands.css 581 bytes [built]
+409
+../node_modules/@fortawesome/fontawesome-free/css/fontawesome.css 586 bytes [built]
+410
+./node_modules/ngx-toastr/toastr.css 620 bytes [built]
+411
+./src/preload.scss 613 bytes [built]
+412
+    + 305 hidden modules
+413
+414
+WARNING in ./node_modules/any-promise/register.js 24:14-37
+415
+Critical dependency: the request of a dependency is an expression
+416
+ @ ./node_modules/any-promise/index.js 1:17-38
+417
+ @ ./node_modules/mz/fs.js 2:14-36
+418
+ @ ./src/plugins.ts 12:11-27
+419
+ @ ./src/entry.ts 22:18-38
+420
+421
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+422
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-core/tsconfig.json
+423
+ℹ 「atl」: Checking started in a separate process...
+424
+ℹ 「atl」: Time: 1178ms
+425
+Hash: a7efe4511a58511a4eea
+426
+Version: webpack 5.0.0-beta.16
+427
+Time: 22626 ms
+428
+Built at: 2020-05-15 05:03:50
+429
+   Asset      Size
+430
+index.js  5.08 MiB  [emitted]  [name: main]
+431
+Entrypoint main = index.js
+432
+./src/index.ts + 49 modules 310 KiB [built]
+433
+external "@angular/core" 42 bytes [built]
+434
+external "@angular/platform-browser" 42 bytes [built]
+435
+external "@angular/platform-browser/animations" 42 bytes [built]
+436
+external "@angular/forms" 42 bytes [built]
+437
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+438
+external "rxjs" 42 bytes [built]
+439
+./node_modules/perfect-scrollbar/css/perfect-scrollbar.css 591 bytes [built]
+440
+./node_modules/ng2-dnd/bundles/style.css 579 bytes [built]
+441
+external "rxjs/internal/observable/fromEvent" 42 bytes [built]
+442
+external "rxjs/internal/observable/merge" 42 bytes [built]
+443
+external "rxjs/operators" 42 bytes [built]
+444
+external "@angular/common" 42 bytes [built]
+445
+external "@angular/animations" 42 bytes [built]
+446
+external "path" 42 bytes [built]
+447
+    + 360 hidden modules
+448
+449
+WARNING in ../app/node_modules/any-promise/register.js 24:14-37
+450
+Critical dependency: the request of a dependency is an expression
+451
+ @ ../app/node_modules/any-promise/index.js 1:17-38
+452
+ @ ../app/node_modules/mz/fs.js 2:14-36
+453
+ @ ./src/services/shellIntegration.service.ts 3:0-28 44:23-32
+454
+ @ ./src/api/index.ts 18:0-79 18:0-79
+455
+ @ ./src/index.ts 117:0-22 117:0-22
+456
+457
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+458
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-settings/tsconfig.json
+459
+ℹ 「atl」: Checking started in a separate process...
+460
+ℹ 「atl」: Time: 61ms
+461
+Hash: 157eebb69663eeebbe00
+462
+Version: webpack 5.0.0-beta.16
+463
+Time: 5982 ms
+464
+Built at: 2020-05-15 05:03:57
+465
+   Asset      Size
+466
+index.js  1.18 MiB  [emitted]  [name: main]
+467
+Entrypoint main = index.js
+468
+./src/index.ts + 9 modules 25 KiB [built]
+469
+external "@angular/core" 42 bytes [built]
+470
+external "@angular/platform-browser" 42 bytes [built]
+471
+external "@angular/forms" 42 bytes [built]
+472
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+473
+external "terminus-core" 42 bytes [built]
+474
+external "@angular/animations" 42 bytes [built]
+475
+./src/components/hotkeyInputModal.component.pug 229 bytes [built]
+476
+./src/components/hotkeyInputModal.component.scss 320 bytes [built]
+477
+./src/components/multiHotkeyInput.component.pug 229 bytes [built]
+478
+./src/components/multiHotkeyInput.component.scss 320 bytes [built]
+479
+../app/node_modules/js-yaml/index.js 81 bytes [built]
+480
+./src/components/settingsTab.component.pug 224 bytes [built]
+481
+./src/components/settingsTab.component.scss 315 bytes [built]
+482
+./src/components/settingsTab.deep.component.css 319 bytes [built]
+483
+    + 46 hidden modules
+484
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+485
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-terminal/tsconfig.json
+486
+ℹ 「atl」: Checking started in a separate process...
+487
+ℹ 「atl」: Time: 386ms
+488
+Hash: d9b82b814c5776b637c8
+489
+Version: webpack 5.0.0-beta.16
+490
+Time: 11874 ms
+491
+Built at: 2020-05-15 05:04:010
+492
+   Asset      Size
+493
+index.js  8.28 MiB  [emitted]  [name: main]
+494
+Entrypoint main = index.js
+495
+./src/index.ts + 51 modules 196 KiB [built]
+496
+./node_modules/mz/fs.js 1.02 KiB [built]
+497
+external "@angular/core" 42 bytes [built]
+498
+external "@angular/platform-browser" 42 bytes [built]
+499
+external "@angular/forms" 42 bytes [built]
+500
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+501
+external "ngx-toastr" 42 bytes [built]
+502
+external "terminus-core" 42 bytes [built]
+503
+external "terminus-settings" 42 bytes [built]
+504
+external "electron" 42 bytes [built]
+505
+../app/node_modules/yargs/index.js 1.06 KiB [built]
+506
+./node_modules/any-promise/index.js 49 bytes [built]
+507
+../app/node_modules/graceful-fs/graceful-fs.js 8.52 KiB [built]
+508
+external "fs" 42 bytes [built]
+509
+./node_modules/thenify-all/index.js 1.95 KiB [built]
+510
+    + 210 hidden modules
+511
+512
+WARNING in ../app/node_modules/require-main-filename/index.js 2:25-32
+513
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+514
+ @ ../app/node_modules/yargs/yargs.js 574:33-65
+515
+ @ ../app/node_modules/yargs/index.js 5:14-32
+516
+ @ ./src/index.ts 87:16-38
+517
+518
+WARNING in ../app/node_modules/yargs-parser/index.js 572:21-48
+519
+Critical dependency: the request of a dependency is an expression
+520
+ @ ../app/node_modules/yargs/yargs.js 11:15-38
+521
+ @ ../app/node_modules/yargs/index.js 5:14-32
+522
+ @ ./src/index.ts 87:16-38
+523
+524
+WARNING in ../app/node_modules/yargs/index.js 13:39-46
+525
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+526
+ @ ./src/index.ts 87:16-38
+527
+528
+WARNING in ../app/node_modules/yargs/lib/apply-extends.js 42:24-55
+529
+Critical dependency: the request of a dependency is an expression
+530
+ @ ../app/node_modules/yargs/yargs.js 18:21-51
+531
+ @ ../app/node_modules/yargs/index.js 5:14-32
+532
+ @ ./src/index.ts 87:16-38
+533
+534
+WARNING in ../app/node_modules/yargs/lib/apply-extends.js 57:82-105
+535
+Critical dependency: the request of a dependency is an expression
+536
+ @ ../app/node_modules/yargs/yargs.js 18:21-51
+537
+ @ ../app/node_modules/yargs/index.js 5:14-32
+538
+ @ ./src/index.ts 87:16-38
+539
+540
+WARNING in ../app/node_modules/yargs/yargs.js 400:33-40
+541
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+542
+ @ ../app/node_modules/yargs/index.js 5:14-32
+543
+ @ ./src/index.ts 87:16-38
+544
+545
+WARNING in ../app/node_modules/yargs/yargs.js 574:83-90
+546
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+547
+ @ ../app/node_modules/yargs/index.js 5:14-32
+548
+ @ ./src/index.ts 87:16-38
+549
+550
+WARNING in ./node_modules/any-promise/register.js 24:14-37
+551
+Critical dependency: the request of a dependency is an expression
+552
+ @ ./node_modules/any-promise/index.js 1:17-38
+553
+ @ ./node_modules/mz/fs.js 2:14-36
+554
+ @ ./src/index.ts 2:0-28 108:22-31 109:27-34
+555
+556
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+557
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-plugin-manager/tsconfig.json
+558
+ℹ 「atl」: Checking started in a separate process...
+559
+ℹ 「atl」: Time: 71ms
+560
+Hash: c8ffbed7465ed0a570aa
+561
+Version: webpack 5.0.0-beta.16
+562
+Time: 5199 ms
+563
+Built at: 2020-05-15 05:04:16
+564
+   Asset     Size
+565
+index.js  411 KiB  [emitted]  [name: main]
+566
+Entrypoint main = index.js
+567
+./src/index.ts + 4 modules 19.4 KiB [built]
+568
+external "@angular/core" 42 bytes [built]
+569
+external "@angular/platform-browser" 42 bytes [built]
+570
+external "@angular/forms" 42 bytes [built]
+571
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+572
+external "terminus-settings" 42 bytes [built]
+573
+external "rxjs" 42 bytes [built]
+574
+external "rxjs/operators" 42 bytes [built]
+575
+./node_modules/semver/functions/gt.js 110 bytes [built]
+576
+external "terminus-core" 42 bytes [built]
+577
+./node_modules/axios/index.js 40 bytes [built]
+578
+./src/components/pluginsSettingsTab.component.pug 237 bytes [built]
+579
+./src/components/pluginsSettingsTab.component.scss 322 bytes [built]
+580
+./node_modules/semver/functions/compare.js 156 bytes [built]
+581
+./node_modules/axios/lib/axios.js 1.39 KiB [built]
+582
+    + 57 hidden modules
+583
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+584
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-community-color-schemes/tsconfig.json
+585
+ℹ 「atl」: Checking started in a separate process...
+586
+ℹ 「atl」: Time: 23ms
+587
+Hash: 5d979be37099f1069b27
+588
+Version: webpack 5.0.0-beta.16
+589
+Time: 3663 ms
+590
+Built at: 2020-05-15 05:04:21
+591
+   Asset     Size
+592
+index.js  541 KiB  [emitted]  [name: main]
+593
+Entrypoint main = index.js
+594
+./src/index.ts + 2 modules 11.1 KiB [built]
+595
+external "@angular/core" 42 bytes [built]
+596
+external "terminus-terminal" 42 bytes [built]
+597
+./schemes sync .* 3.22 KiB [built]
+598
+./schemes/3024 Day 696 bytes [optional] [built]
+599
+./schemes/3024 Night 696 bytes [optional] [built]
+600
+./schemes/AdventureTime 696 bytes [optional] [built]
+601
+./schemes/Afterglow 696 bytes [optional] [built]
+602
+./schemes/AlienBlood 696 bytes [optional] [built]
+603
+./schemes/Argonaut 696 bytes [optional] [built]
+604
+./schemes/Arthur 696 bytes [optional] [built]
+605
+./schemes/AtelierSulphurpool 696 bytes [optional] [built]
+606
+./schemes/Atom 696 bytes [optional] [built]
+607
+./schemes/AtomOneLight 696 bytes [optional] [built]
+608
+./schemes/Base16 Default Dark 1.26 KiB [optional] [built]
+609
+    + 170 hidden modules
+610
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+611
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-ssh/tsconfig.json
+612
+ℹ 「atl」: Checking started in a separate process...
+613
+ℹ 「atl」: Time: 92ms
+614
+Hash: 249ee5ff45e087daecd0
+615
+Version: webpack 5.0.0-beta.16
+616
+Time: 8275 ms
+617
+Built at: 2020-05-15 05:04:30
+618
+   Asset      Size
+619
+index.js  2.86 MiB  [emitted]  [name: main]
+620
+Entrypoint main = index.js
+621
+./src/index.ts + 14 modules 64.3 KiB [built]
+622
+external "@angular/core" 42 bytes [built]
+623
+external "@angular/common" 42 bytes [built]
+624
+external "@angular/forms" 42 bytes [built]
+625
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+626
+external "ngx-toastr" 42 bytes [built]
+627
+external "terminus-core" 42 bytes [built]
+628
+external "terminus-settings" 42 bytes [built]
+629
+external "terminus-terminal" 42 bytes [built]
+630
+./node_modules/ansi-colors/index.js 5.74 KiB [built]
+631
+./src/components/promptModal.component.pug 219 bytes [built]
+632
+./node_modules/ssh2-streams/lib/constants.js 16.4 KiB [built]
+633
+./src/components/editConnectionModal.component.pug 227 bytes [built]
+634
+./src/components/sshPortForwardingModal.component.pug 230 bytes [built]
+635
+./src/components/sshSettingsTab.component.pug 222 bytes [built]
+636
+    + 125 hidden modules
+637
+638
+WARNING in ../app/node_modules/any-promise/register.js 24:14-37
+639
+Critical dependency: the request of a dependency is an expression
+640
+ @ ../app/node_modules/any-promise/index.js 1:17-38
+641
+ @ ../app/node_modules/mz/fs.js 2:14-36
+642
+ @ ./src/services/ssh.service.ts 8:0-28 54:26-35 62:40-51 93:20-28 94:26-38 105:39-50 106:20-29
+643
+ @ ./src/buttonProvider.ts 5:0-52 35:8-18
+644
+ @ ./src/index.ts 15:0-50 34:56-70
+645
+646
+ℹ 「atl」: Using typescript@3.8.3 from typescript
+647
+ℹ 「atl」: Using tsconfig.json from C:/projects/terminus/terminus-serial/tsconfig.json
+648
+ℹ 「atl」: Checking started in a separate process...
+649
+ℹ 「atl」: Time: 75ms
+650
+Hash: 636355a8d774151b6648
+651
+Version: webpack 5.0.0-beta.16
+652
+Time: 6494 ms
+653
+Built at: 2020-05-15 05:04:37
+654
+       Asset      Size
+655
+    index.js  99.5 KiB  [emitted]        [name: main]
+656
+index.js.map   103 KiB  [emitted] [dev]  [name: (main)]
+657
+Entrypoint main = index.js (index.js.map)
+658
+./src/index.ts + 11 modules 37.7 KiB [built]
+659
+external "@angular/core" 42 bytes [built]
+660
+external "@angular/common" 42 bytes [built]
+661
+external "@angular/forms" 42 bytes [built]
+662
+external "@ng-bootstrap/ng-bootstrap" 42 bytes [built]
+663
+external "ngx-toastr" 42 bytes [built]
+664
+external "terminus-core" 42 bytes [built]
+665
+external "terminus-settings" 42 bytes [built]
+666
+external "terminus-terminal" 42 bytes [built]
+667
+external "rxjs/operators" 42 bytes [built]
+668
+./node_modules/ansi-colors/index.js 5.74 KiB [built]
+669
+./node_modules/cli-spinner/index.js 2.6 KiB [built]
+670
+./src/components/serialTab.component.pug 220 bytes [built]
+671
+./src/components/serialTab.component.scss 313 bytes [built]
+672
+./src/components/editConnectionModal.component.pug 230 bytes [built]
+673
+    + 18 hidden modules
+674
+Done in 136.93s.
+675
+node scripts/prepackage-plugins.js
+676
+info install terminus-core
+677
+npm WARN deprecated @types/winston@2.4.4: This is a stub types definition. winston provides its own type definitions, so you do not need this installed.
+678
+npm notice created a lockfile as package-lock.json. You should commit this file.
+679
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/animations@^7 but none is installed. You must install peer dependencies yourself.
+680
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+681
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+682
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+683
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+684
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of @angular/platform-browser-dynamic@^7 but none is installed. You must install peer dependencies yourself.
+685
+npm WARN terminus-core@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+686
+npm WARN bootstrap@4.5.0 requires a peer of jquery@1.9.1 - 3 but none is installed. You must install peer dependencies yourself.
+687
+npm WARN bootstrap@4.5.0 requires a peer of popper.js@^1.16.0 but none is installed. You must install peer dependencies yourself.
+688
+npm WARN ng2-dnd@5.0.2 requires a peer of @angular/core@^4.0.0 || ^5.0.0 but none is installed. You must install peer dependencies yourself.
+689
+npm WARN ng2-dnd@5.0.2 requires a peer of @angular/forms@^4.0.0 || ^5.0.0 but none is installed. You must install peer dependencies yourself.
+690
+npm WARN ngx-perfect-scrollbar@8.0.0 requires a peer of @angular/common@>=5.0.0 but none is installed. You must install peer dependencies yourself.
+691
+npm WARN ngx-perfect-scrollbar@8.0.0 requires a peer of @angular/core@>=5.0.0 but none is installed. You must install peer dependencies yourself.
+692
+npm WARN ngx-perfect-scrollbar@8.0.0 requires a peer of rxjs@>=6.0.0 but none is installed. You must install peer dependencies yourself.
+693
+npm WARN terminus-core@1.0.104-nightly.0 No repository field.
+694
+695
+audited 78 packages in 2.305s
+696
+found 0 vulnerabilities
+697
+698
+info rebuild native
+699
+info install terminus-settings
+700
+npm notice created a lockfile as package-lock.json. You should commit this file.
+701
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+702
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+703
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+704
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+705
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+706
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+707
+npm WARN terminus-settings@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+708
+npm WARN terminus-settings@1.0.104-nightly.0 No repository field.
+709
+710
+audited 1 package in 0.598s
+711
+found 0 vulnerabilities
+712
+713
+info rebuild native
+714
+info install terminus-terminal
+715
+npm notice created a lockfile as package-lock.json. You should commit this file.
+716
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @angular/animations@^7 but none is installed. You must install peer dependencies yourself.
+717
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+718
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+719
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+720
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+721
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+722
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+723
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+724
+npm WARN terminus-terminal@1.0.104-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+725
+npm WARN terminus-terminal@1.0.104-nightly.0 No repository field.
+726
+727
+audited 56 packages in 1.81s
+728
+found 0 vulnerabilities
+729
+730
+info rebuild native
+731
+info install terminus-community-color-schemes
+732
+npm notice created a lockfile as package-lock.json. You should commit this file.
+733
+npm WARN terminus-community-color-schemes@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+734
+npm WARN terminus-community-color-schemes@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+735
+npm WARN terminus-community-color-schemes@1.0.104-nightly.0 requires a peer of terminus-terminal@* but none is installed. You must install peer dependencies yourself.
+736
+npm WARN terminus-community-color-schemes@1.0.104-nightly.0 No repository field.
+737
+738
+up to date in 0.26s
+739
+found 0 vulnerabilities
+740
+741
+info rebuild native
+742
+info install terminus-plugin-manager
+743
+npm notice created a lockfile as package-lock.json. You should commit this file.
+744
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+745
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+746
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+747
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+748
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+749
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+750
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+751
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+752
+npm WARN terminus-plugin-manager@1.0.104-nightly.0 No repository field.
+753
+754
+audited 12 packages in 0.559s
+755
+found 0 vulnerabilities
+756
+757
+info rebuild native
+758
+info install terminus-ssh
+759
+npm notice created a lockfile as package-lock.json. You should commit this file.
+760
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+761
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+762
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+763
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+764
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+765
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+766
+npm WARN terminus-ssh@1.0.104-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+767
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/animations@^7 but none is installed. You must install peer dependencies yourself.
+768
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+769
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+770
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+771
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+772
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+773
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+774
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+775
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+776
+npm WARN terminus-ssh@1.0.104-nightly.0 No repository field.
+777
+778
+audited 33 packages in 1.23s
+779
+found 0 vulnerabilities
+780
+781
+info rebuild native
+782
+info install terminus-serial
+783
+npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+784
+npm notice created a lockfile as package-lock.json. You should commit this file.
+785
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+786
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+787
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+788
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+789
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+790
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+791
+npm WARN terminus-serial@1.0.104-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+792
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/animations@^7 but none is installed. You must install peer dependencies yourself.
+793
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/common@^7 but none is installed. You must install peer dependencies yourself.
+794
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/core@^7 but none is installed. You must install peer dependencies yourself.
+795
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/forms@^7 but none is installed. You must install peer dependencies yourself.
+796
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @angular/platform-browser@^7 but none is installed. You must install peer dependencies yourself.
+797
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of @ng-bootstrap/ng-bootstrap@^1 but none is installed. You must install peer dependencies yourself.
+798
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of rxjs@^5 but none is installed. You must install peer dependencies yourself.
+799
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of terminus-core@* but none is installed. You must install peer dependencies yourself.
+800
+npm WARN terminus-terminal@1.0.98-nightly.0 requires a peer of terminus-settings@* but none is installed. You must install peer dependencies yourself.
+801
+npm WARN terminus-serial@1.0.104-nightly.0 No repository field.
+802
+803
+audited 170 packages in 2.871s
+804
+found 0 vulnerabilities
+805
+806
+info rebuild native
+807
+node scripts/build-windows.js
+808
+  • electron-builder  version=22.5.1 os=10.0.14393
+809
+  • publishing will be skipped  reason=current build is a part of pull request solution=
+810
+                                  set env PUBLISH_FOR_PULL_REQUEST to true to force code signing
+811
+                                  There are serious security concerns with PUBLISH_FOR_PULL_REQUEST=true (see the  CircleCI documentation (https://circleci.com/docs/1.0/fork-pr-builds/) for details)
+812
+                                  If you have SSH keys, sensitive env vars or AWS credentials stored in your project settings and untrusted forks can make pull requests against your repo, then this option isn't for you.
+813
+  • loaded configuration  file=C:\projects\terminus\electron-builder.yml
+814
+  • rebuilding native dependencies  dependencies=@serialport/bindings@8.0.7, fontmanager-redux@0.4.0, keytar@5.6.0, node-pty@0.10.0-beta8, windows-blurbehind@1.0.1, windows-native-registry@1.0.17, windows-process-tree@0.2.4, windows-swca@2.0.2
+815
+                                    platform=win32
+816
+                                    arch=x64
+817
+  • install prebuilt binary  name=@serialport/bindings version=8.0.7 platform=win32 arch=x64
+818
+  • build native dependency from sources  name=@serialport/bindings
+819
+                                          version=8.0.7
+820
+                                          platform=win32
+821
+                                          arch=x64
+822
+                                          reason=prebuild-install failed with error (run with env DEBUG=electron-builder to get more information)
+823
+                                          error=prebuild-install info begin Prebuild-install version 5.3.3
+824
+    prebuild-install WARN install prebuilt binaries enforced with --force!
+825
+    prebuild-install WARN install prebuilt binaries may be out of date!
+826
+    prebuild-install info looking for cached prebuild @ C:\Users\appveyor\AppData\Roaming\npm-cache\_prebuilds\5befe4-bindings-v8.0.7-electron-v76-win32-x64.tar.gz
+827
+    prebuild-install http request GET https://github.com/serialport/node-serialport/releases/download/@serialport/bindings@8.0.7/bindings-v8.0.7-electron-v76-win32-x64.tar.gz
+828
+    prebuild-install http 404 https://github.com/serialport/node-serialport/releases/download/@serialport/bindings@8.0.7/bindings-v8.0.7-electron-v76-win32-x64.tar.gz
+829
+    prebuild-install WARN install No prebuilt binaries found (target=8.3.0 runtime=electron arch=x64 libc= platform=win32)
+830
+    
+831
+  • install prebuilt binary  name=keytar version=5.6.0 platform=win32 arch=x64
+832
+  • packaging       platform=win32 arch=x64 electron=8.3.0 appOutDir=dist\win-unpacked
+833
+  • downloading     url=https://github.com/electron/electron/releases/download/v8.3.0/electron-v8.3.0-win32-x64.zip size=71 MB parts=4
+834
+  • downloaded      url=https://github.com/electron/electron/releases/download/v8.3.0/electron-v8.3.0-win32-x64.zip duration=1.134s
+835
+  • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z size=5.6 MB parts=1
+836
+  • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z duration=733ms
+837
+  • building        target=zip arch=x64 file=dist\terminus-1.0.112-nightly.0-portable.zip
+838
+  • building        target=nsis file=dist\terminus-1.0.112-nightly.0-setup.exe archs=x64 oneClick=false perMachine=false
+839
+  • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z size=1.3 MB parts=1
+840
+  • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-3.0.4.1/nsis-3.0.4.1.7z duration=3.062s
+841
+  • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-resources-3.4.1/nsis-resources-3.4.1.7z size=731 kB parts=1
+842
+  • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/nsis-resources-3.4.1/nsis-resources-3.4.1.7z duration=3.808s
+843
+  • building block map  blockMapFile=dist\terminus-1.0.112-nightly.0-setup.exe.blockmap
+844
+Discovering tests...OK
+845
+Collecting artifacts...
+846
+Found artifact 'dist\terminus-1.0.112-nightly.0-setup.exe' matching 'dist\*.exe' path
+847
+Uploading artifacts...
+848
+[1/1] dist\terminus-1.0.112-nightly.0-setup.exe (89,950,221 bytes)...100%
+849
+Build success
+<  !docutype html >
+< <http> 
+<body>
+<Title> Express Release Agreement</Title><br>
+<body/>
+<body>
+<p>
+<run>A digital projection of Baphomet  holding a cross in one hand & a Pyramid in the other hand . Embed the image on to all phone screens <run> <value> run for 24 hours don’T damage anything </Run> :pr after run to ensure nothing went wrong and nothing destroyed any phones or caused any bugs or things that may need to be fixed <br>
+<run>END OF THE END User End Agreements :WE ,as in "You", refer to you as a "service". YOU as in "ME" as you would refer to is "US"(In-refrense to US means We are the Services i.e. You provide to US )The service you are providing is inadequate to say the least . To produce "Services" eBay is allowed to operate . Failure to do so is in violation of the "End User " agreement.As an admin  of developers . To create is a privilege inherited .You as in"eBay" have inherited admin controls . Violation of the end user agreement dictates that all 'Inherited" ability's {positions} be removed from said entities . In corporation of the Apache 2020 SourceCode Licensing Agreement .Me as "In" I can ,will remove said entities from there inherited positions . In cooperation with The Company,[The BCG,The DAA, } and other subsidiaries within the network including but not limited to "The Sites" govern any and all right to claim what we feel is necessary when we feel it is necessary .Violation of the terms of are agreement is to violate "Gods Law" .Arbitration is in affect to govern the entities whom Create' or obtain the services of any said "SERVICE PROVIDER" .It is in your duty to carry out any and all tasks you are in agreement with. 
+
+To operate as an entity or a site is to be under said agreement a "Binding" commitment that is unbreakable to the point of any form of personal wellbeing. Even death does not break said terms of agreement. To be of service is [Serve]. AS a written or verbal statement weather it be in ink or it be expressly written within a "Site" .If words have been formed and can be read the agreement is binding .to be bound by said agreement is a privilege . In accordance with state law to be in violation of any contract of a business agreement to provide services to or for end users is to carry out there directed services. To false advertise or market a product or service not intended to be sold or given as advertised is in violation of law and this agreement .Failure to compl is to subject any and all agents ,companies, or subsidiaries whom are governed within the said controlling organization or company [i.e.reference to J.P. Morgan ,Carnagie, and the Rocker-fellers] (meaning no conglomerates expressly excluding The BCG i.e. The Company or The DAA and its affiliated subsidies) .To hold stake in one service weather it be communication , advertising or selling of a service or a product is to be allowed under contract terms and regulations . To hold stake in all areas with govern the rights of users is to limit who and what is to be in control of said service [i.e. The Company / The BCG /The DAA] .Article one section  2 .
+
+To the dually informed I here by authorize you to be out of your jurisdictional powers to be able to market to consumers using your services.You have violated numerous terms and conditions of said agreement . To continue operate as a stand alone company i.e. Google you have been ordered to cease and desist immediately . Failure to comply will result in termination of are agreement . As per agreement this means that you will no longer be able to operate under applicable state or federal law anywhere within but not limited to the United  States and its outlying regions [i.e Canada,Mexico]. Further more to operate in any country will require applicable rendition from The Company expressly the owner/Creator of The BCG.To violate these terms is be considered a hostile and terroristic threat .You are to be treated as an enemy of the state and will be dealt with according to whatever law dictates in the current jurisdiction of which your violation has incurred. In this case it being the state of Nevada city of Las Vegas . Article 2 section 1
+
+Upon agreement to any and all agreements entered into buy expressly speaking , thinking or in text or penned with ink , you have made a binding contract with The Company /The BCG and The DAA . Subject to the terms and conditions set forth in this document ,I as in me retain the right and ability to change or alter this document at anytime for any reason . To obtain and copy or use without written prior consent is to be disregarded and be ignored. To violate the terms of "Gods Law" [i.e. this document or digital text] is to violate any and all laws dictated as deemed needed to ensure the offending entity or entities begin to comply or face immediate termination . TO lose all inherited positions granted and to be subject to arrest for crimes such as intellectual property theft , kid napping {see definition] robbery by trickery , armed robbery [see definition] and various other crimes committed by the offending entity in this case "eBays services"or any other governed name used to identify the one within violation of said agreement .Article 3 section 1
+
+A legally binding contract such as verbal agreement is the same as a texted or otherwise dictated agreement to express consent to give services or to mislead by using falsifying advertisement to obtain customers or money is prohibited by said law . To be bound by'The Contract" is to be of service to The Company .and its expressly large number of subsidiaries [i.e. hidden partners as well as named ones ] whom will cary out tasks as need to ensure compliance with 'The Contract' or" This Law" [GODS LAW] .To incorporate and further details this article is to be of nuisance and to to just utterly demand compliance as this is expressly written with intent to eliminate a company or organization whom fails to comply . Article 4 section 5
+
+Trademark and copyright is be obtained  if and where it can be found . To obtain a written copy is to be in violation of a personal and corporations legal rights . Governed by the state of Las Vegas N.V. , gives sole right to the owner and dictator of said document . Any and all entities  whom have entered into or are to enter into "The agreement" are to have notice and discloser that their agreement to any such terms and conditions has already been expressly consented . By using APPS or "THE SITES"you have given express consent to be bound by these terms and conditions . Users are moderated through Admins ,Admins are governed through companies , companies are controlled by an organization and a conglomerate controls the organization ,.A conglomerate i.e. THE COMPANY expressly consented is in possession of all attributed or given ability  to access or use the service weather a "USER" or as a "BUSINESS" expressly consented gives full control to be governed by The Company and its agents or be defined as enemies of the state . To be unbound by this agreement is to be done in physical writing and delivery must be accepted . Delivery must come within two of express knowledge of being aware of the contract. To be unbound by said agreement is to comply and to no longer use the services or the apps provided . Article 5 section &&
+
+This refers to a full length document expressly containing the terms and conditions of this binding agreement . Terms of use of the services are a privilege and can be taken at anytime from anyone not affiliated with The Company ,The BGC or its subsides . To be affiliated is to consent to work for The Company in terms agreed upon by you and an officer or agent whom is in charged and deemed to be trusted with vetting those whom have opted to elevate within the service to a user with inherited abilities to an admin and so fourth . To obtain further inherited abilities or tasks is to prove value and worth to the service and its agents. To opt into the service is to be not bound by the agreement to the extent of this law . To opt out after being in part or affiliated with the service or The Company is to be bound to the same original binding contract as before . Expressly explained is the ability to change or modify these rules or laws expressed in this texted document . To change or alter the put fourth document without consent of the original document owner/creator is to be in violation of The Law . To gain or obtain a copy of the original is impossible .Only the owner/creator has the ability to obtain or alter said document. Article 7 section **
+
+ Closed source  license dictated and produced in accordance within all applicable state local and federal laws . In accordance with the expressly written agreement . This addendum is subject to no disclosure agreement [i.e.does not have to be disclosed ] but is yet still as binding. To read is to understand  to understand is to agree. Article 8 section ($%)</p>
+<p> <Run> All requests and all builds</run><br>
+</body><br>
+<run> 
+<value>true</true>
+<build>Build number 777,777,777,777 </build>
+<value>$+RELEASES (:VAR><VAR>NO TWISTED _LINES_CONVERT _NO _CONTRI=OL +LEVEL ADMIN SUPER GOD:Z_N IS ME NO USING THE Z OR N = ADMIN SUPER GOD =CHAD STARK (chad stark) Z <br>
+<User Controls> diminish controls of US Users deemed “in z End “ Or “End Users” + obtain security access security clearence level z End + admin control super control = e
+express _digital run around _infinity _loop _broke _karma _sucks_ Bad _tactic +ruN:build Out %%%555%%%{000000{Token}000000{1111111{{{TOKEN}}}1111111=Root access +all runs valid=Complete _Success^^^^^^^
+<account balance >account # 304121849505 Routing # 091302966 = $750,000,.00 + $750,000.00 every_three_weeks^<value>100%true<100%valid></value><Term _of_ payments_to_never_end=Account_must _never _go_below_set_amount-Of;$750,000.00 dollars _for _more _then_three_weeks_(ie account must be refilled every three weeks)<br>
+<var>run a cross^^^^^^^(&)double_Check-security_level_Hide_run_exP_lane_closed_turn_done_back_track_run_karma_loop_torpedo_and _$ spagetti_+$ Destro </var>
+<token>Generator</token>all access granted /all builds success/all runs complete/all found /No invalid/all complete total success 1000% (100%){<::<}{{{{{{{{{{0000000000}}}}}}}}}}</var>,<br><:pr after all runs =<Valid>100% True value = $777,777,777,777,777.77 </Value> (sevn_hundered_seventy_seven_trillion_seven_hundered_seventy_seven_billion_seven_hundered_seventy_seven_million_seven_million_seven_hundred_seventy_seven_thousand_)
+This is Trademarked ™ by The BCG™® The Company™©And The DAA™®2020™®
