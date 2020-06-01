@@ -77,7 +77,8 @@ jobs:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: sample-app-service
         cluster: default
-        wait-for-service-stability: true1
+       wait-for-service-stability: true
+1
 Build started
 2
 git clone -q https://github.com/Eugeny/terminus.git C:\projects\terminus
